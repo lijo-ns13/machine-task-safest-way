@@ -1,5 +1,6 @@
 import type { AnalyzeResponse } from '../types/api'
 import RouteCard from './RouteCard'
+import CheckpointTable from './CheckpointTable'
 import './ResultsPanel.css'
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ResultsPanel({ data, selectedRouteId, onSelectRoute }: Props) {
+  const selectedRoute = data.routes.find((r) => r.id === selectedRouteId)
   return (
     <section className="results">
       <div className="recommendation">
@@ -34,6 +36,7 @@ export default function ResultsPanel({ data, selectedRouteId, onSelectRoute }: P
           />
         ))}
       </div>
+      <CheckpointTable checkpoints={selectedRoute?.checkpoints ?? []} />
     </section>
   )
 }

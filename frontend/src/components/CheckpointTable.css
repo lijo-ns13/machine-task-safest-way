@@ -1,0 +1,37 @@
+.checkpoints {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkpoints h2 {
+  font-size: 1rem;
+}
+
+.checkpoints__scroll {
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.checkpoints table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.checkpoints th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  text-align: left;
+  padding: 6px 8px;
+  color: var(--muted);
+}
+
+.checkpoints td {
+  padding: 6px 8px;
+  border-top: 1px solid var(--border);
+  white-space: nowrap;
+}
