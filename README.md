@@ -1,7 +1,57 @@
 # Weather-Aware Truck Routing
 
 Pick the safest truck route by weather risk, load weight and travel time.
-React + TypeScript frontend (coming next) and a Django REST backend (this folder).
+React + TypeScript frontend (`frontend/`) and a Django REST backend (`backend/`).
+
+## Run the whole app (two terminals)
+
+Prerequisites: Python 3.11+, Node 20+, and a free Mapbox token (see [API keys](#api-keys)).
+
+**Terminal 1: backend** (http://127.0.0.1:8000)
+
+```powershell
+cd backend
+python -m venv .venv
+.venv\Scripts\activate            # macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+copy .env.example .env            # macOS/Linux: cp .env.example .env
+# edit backend/.env and paste your MAPBOX_TOKEN
+python manage.py runserver
+```
+
+**Terminal 2: frontend** (http://localhost:5173)
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173. In development Vite proxies `/api` to Django, so no frontend env file is needed. For a deployed build set `VITE_API_BASE_URL` (see `frontend/.env.example`) and add the frontend URL to `CORS_ALLOWED_ORIGINS` in the backend `.env`.
+
+## Frontend
+
+```
+frontend/src/
+  api/routesApi.ts          typed fetch client, maps 400/422/502 to friendly errors
+  hooks/useRouteAnalysis.ts loading / error / data state, cancels stale requests
+  types/api.ts              TypeScript types mirroring the API response
+  utils/                    risk colours, date / distance formatting
+  components/
+    RouteForm.tsx           origin, destination, departure, load + validation
+    ResultsPanel.tsx        recommendation banner + warnings + route cards + table
+    RouteCard.tsx           one route: distance, time, ETA, Severe/High miles, avg risk
+    CheckpointTable.tsx     checkpoints of the selected route
+    map/MapView.tsx         Leaflet map (canvas renderer)
+    map/RouteLines.tsx      the 3 routes; click to select
+    map/CheckpointMarkers.tsx  risk-coloured dots with weather popup
+    map/HeatmapLayer.tsx    one persistent leaflet.heat layer, slider only swaps data
+    map/HeatmapControls.tsx 0-48 h slider, time label, legend, show/hide
+```
+
+Why the slider is smooth: the backend sends all 49 hourly frames in the single analyze response, so moving the slider makes no network request. It only swaps the data of one existing heat layer.
+
+Run `npm run build` for a type-checked production build and `npm run lint` for lint.
 
 ## How it works
 
@@ -39,7 +89,7 @@ Code map (`backend/routing/`):
 - **Heatmap:** intensity = risk level / 4, using the same risk function and load rules. Frame `h` is `start_time + h` hours.
 - **Scope:** US only, no auth, no database.
 
-## Setup
+## Setup (backend only)
 
 Requires Python 3.11+.
 
