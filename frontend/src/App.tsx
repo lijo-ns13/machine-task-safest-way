@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ResultsPanel from './components/ResultsPanel'
+import MapView from './components/map/MapView'
 import RouteForm from './components/RouteForm'
 import { useRouteAnalysis } from './hooks/useRouteAnalysis'
 import './App.css'
@@ -34,6 +35,9 @@ export default function App() {
                   />
                 )}
       </aside>
+      <main className="map-area">
+        <MapView data={data} selectedRouteId={selectedRouteId} onSelectRoute={setPickedRouteId} />
+      </main>
     </div>
   )
 }
