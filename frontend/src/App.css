@@ -1,0 +1,39 @@
+.app {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  height: 100%;
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.sidebar__header h1 {
+  font-size: 1.25rem;
+  margin-bottom: 4px;
+}
+
+.map-area {
+  position: relative;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 60vh;
+    height: auto;
+    min-height: 100%;
+  }
+
+  .sidebar {
+    border-right: 0;
+    overflow: visible;
+  }
+}
