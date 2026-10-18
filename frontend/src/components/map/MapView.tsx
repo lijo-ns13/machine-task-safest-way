@@ -1,8 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { CircleMarker, MapContainer, TileLayer, Tooltip } from 'react-leaflet'
 import type { AnalyzeResponse } from '../../types/api'
 import CheckpointMarkers from './CheckpointMarkers'
 import FitBounds from './FitBounds'
+import HeatmapControls from './HeatmapControls'
+import HeatmapLayer from './HeatmapLayer'
 import RouteLines from './RouteLines'
 import 'leaflet/dist/leaflet.css'
 import './MapView.css'
@@ -17,6 +19,9 @@ const US_CENTER: [number, number] = [39.5, -98.35]
 
 export default function MapView({ data, selectedRouteId, onSelectRoute }: Props) {
   const selected = data?.routes.find((r) => r.id === selectedRouteId)
+  const [hour, setHour] = useState(0)
+  const [heatmapVisible, setHeatmapVisible] = useState(true)
+  const safeHour = data ? Math.min(hour, data.heatmap.hours) : 0
 
   // Fit to all routes (not only the selected one) so switching routes doesn't move the map.
   const bounds = useMemo(
@@ -25,6 +30,7 @@ export default function MapView({ data, selectedRouteId, onSelectRoute }: Props)
   )
 
   return (
+    <>
     <MapContainer center={US_CENTER} zoom={4} preferCanvas className="map">
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -33,6 +39,7 @@ export default function MapView({ data, selectedRouteId, onSelectRoute }: Props)
       {data && bounds && (
         <>
           <FitBounds bounds={bounds} />
+          {heatmapVisible && <HeatmapLayer heatmap={data.heatmap} hour={safeHour} />}
           <RouteLines
             routes={data.routes}
             selectedRouteId={selectedRouteId}
@@ -45,6 +52,16 @@ export default function MapView({ data, selectedRouteId, onSelectRoute }: Props)
         </>
       )}
     </MapContainer>
+    {data && (
+      <HeatmapControls
+        heatmap={data.heatmap}
+        hour={safeHour}
+        visible={heatmapVisible}
+        onHourChange={setHour}
+        onVisibleChange={setHeatmapVisible}
+      />
+    )}
+    </>
   )
 }
 

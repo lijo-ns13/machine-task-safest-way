@@ -13,7 +13,7 @@ export default function CheckpointTable({ checkpoints }: { checkpoints: Checkpoi
             <tr>
               <th>Mile</th>
               <th>ETA</th>
-              <th>Wind</th>
+              <th>Wind (mph)</th>
               <th>Rain</th>
               <th>Snow</th>
               <th>Risk</th>
@@ -24,7 +24,7 @@ export default function CheckpointTable({ checkpoints }: { checkpoints: Checkpoi
               <tr key={cp.mile} title={cp.reason}>
                 <td>{cp.mile}</td>
                 <td>{formatDateTime(cp.eta)}</td>
-                <td>{cp.weather.wind_mph} mph</td>
+                <td>{cp.weather.wind_mph}</td>
                 <td>{cp.weather.rain_in_hr}</td>
                 <td>{cp.weather.snow_in_hr}</td>
                 <td>
