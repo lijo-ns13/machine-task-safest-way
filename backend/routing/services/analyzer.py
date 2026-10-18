@@ -2,7 +2,7 @@
 from datetime import datetime
 from math import ceil
 
-from . import geocoding, routing, weather
+from . import geocoding, heatmap, routing, weather
 from .recommend import Candidate, recommend, summarize
 from .risk import LEVEL_NAMES, NO_TRAVEL, assess
 from .sampling import auto_interval, sample_checkpoints, thin_polyline
@@ -50,6 +50,7 @@ def analyze(
         "recommendation_reason": reason,
         "routes": routes,
         "warnings": _warnings(options, routes, best_id),
+        "heatmap": heatmap.build_heatmap([o.polyline for o in options], departure, load_lb, FORECAST_HOURS),
     }
     return result
 

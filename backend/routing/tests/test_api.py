@@ -52,6 +52,7 @@ def test_success_shape(client, fake_services):
     assert {"mile", "lat", "lng", "eta", "weather", "risk", "reason"} <= cp.keys()
     assert body["recommended_route_id"] in {"r1", "r2"}
     assert body["recommendation_reason"]
+    assert len(body["heatmap"]["frames"]) == 49
 
 
 def test_heavy_load_in_40mph_wind_is_severe(client, fake_services):
