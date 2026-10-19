@@ -36,12 +36,12 @@ def analyze(
 
     routes, candidates = [], []
     for opt in options:
-        route, stats = _build_route(opt, sampled[opt.id], forecasts, departure, load_lb)
+        route, stats = _build_route(opt, sampled[opt.id], forecasts, load_lb)
         routes.append(route)
         candidates.append(Candidate(opt.id, stats, opt.duration_seconds / 3600))
 
     best_id, reason = recommend(candidates)
-    result = {
+    return {
         "origin": _place(start),
         "destination": _place(end),
         "departure_time": departure.isoformat(),
@@ -52,10 +52,9 @@ def analyze(
         "warnings": _warnings(options, routes, best_id),
         "heatmap": heatmap.build_heatmap([o.polyline for o in options], departure, load_lb, FORECAST_HOURS),
     }
-    return result
 
 
-def _build_route(opt, checkpoints, forecasts, departure, load_lb):
+def _build_route(opt, checkpoints, forecasts, load_lb):
     levels, checkpoint_json = [], []
     for cp in checkpoints:
         wx = forecasts[(cp.lat, cp.lng)].at(cp.eta)
