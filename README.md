@@ -87,7 +87,7 @@ Code map (`backend/routing/`):
 - **Ranking:** No Travel miles, Severe miles, High miles, average risk (mile-weighted), then travel time. No Travel is ranked first because it is worse than Severe.
 - **Checkpoint interval:** automatic (10 mi for trips up to 100 mi, 25 up to 300, else 50). Optionally send `checkpoint_interval_miles` as 10, 25 or 50.
 - **Heatmap:** intensity = risk level / 4, using the same risk function and load rules. Frame `h` is `start_time + h` hours.
-- **Scope:** US only, no auth, no database.
+- **Scope:** worldwide place search by default (set `GEOCODING_COUNTRY=us` or `in,us` in `.env` to restrict it). Distances are in miles, wind in mph and load in lb, as the risk rules are defined in those units. No auth, no database.
 
 ## Setup (backend only)
 

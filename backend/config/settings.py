@@ -45,6 +45,8 @@ REST_FRAMEWORK = {
 
 # Third-party API configuration
 MAPBOX_TOKEN = os.getenv("MAPBOX_TOKEN", "")
+# Optional comma-separated ISO country codes to restrict geocoding, e.g. "us" or "in,us". Empty = worldwide.
+GEOCODING_COUNTRY = os.getenv("GEOCODING_COUNTRY", "")
 EXTERNAL_API_TIMEOUT = 20  # seconds
 
 # Weather responses are cached so repeated searches don't hammer Open-Meteo.

@@ -10,13 +10,19 @@ URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/{query}.json"
 
 
 def geocode(query: str) -> tuple[float, float, str]:
-    """Return (lat, lng, display name) for the best US match."""
+    """Return (lat, lng, display name) for the best match.
+
+    Worldwide by default; set GEOCODING_COUNTRY (e.g. "us" or "in,us") to restrict it.
+    """
     if not settings.MAPBOX_TOKEN:
         raise UpstreamError("MAPBOX_TOKEN is not configured on the server")
+    params = {"access_token": settings.MAPBOX_TOKEN, "limit": 1}
+    if settings.GEOCODING_COUNTRY:
+        params["country"] = settings.GEOCODING_COUNTRY
     try:
         resp = requests.get(
             URL.format(query=quote(query, safe="")),
-            params={"access_token": settings.MAPBOX_TOKEN, "limit": 1, "country": "us"},
+            params=params,
             timeout=settings.EXTERNAL_API_TIMEOUT,
         )
         resp.raise_for_status()
@@ -25,6 +31,6 @@ def geocode(query: str) -> tuple[float, float, str]:
 
     features = resp.json().get("features", [])
     if not features:
-        raise LocationNotFound(f"Could not find a US location for '{query}'")
+        raise LocationNotFound(f"Could not find a location for '{query}'")
     lng, lat = features[0]["center"]  # Mapbox returns [lng, lat]
     return lat, lng, features[0]["place_name"]

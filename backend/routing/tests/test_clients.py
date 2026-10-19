@@ -73,3 +73,28 @@ def test_upstream_error_does_not_leak_the_token(monkeypatch):
         geocoding.geocode("Dallas")
     assert "pk.test" not in str(info.value)
     assert "MAPBOX_TOKEN" in str(info.value)
+
+
+def _capture_params(monkeypatch):
+    captured = {}
+
+    def fake_get(url, params, timeout):
+        captured.update(params)
+        return FakeResponse({"features": [{"center": [76.2, 10.0], "place_name": "Kochi, India"}]})
+
+    monkeypatch.setattr(geocoding.requests, "get", fake_get)
+    return captured
+
+
+def test_geocoding_is_worldwide_by_default(monkeypatch, settings):
+    settings.GEOCODING_COUNTRY = ""
+    params = _capture_params(monkeypatch)
+    assert geocoding.geocode("Kochi")[2] == "Kochi, India"
+    assert "country" not in params
+
+
+def test_geocoding_can_be_restricted_to_countries(monkeypatch, settings):
+    settings.GEOCODING_COUNTRY = "in,us"
+    params = _capture_params(monkeypatch)
+    geocoding.geocode("Kochi")
+    assert params["country"] == "in,us"
