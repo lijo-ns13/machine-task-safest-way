@@ -4,7 +4,7 @@ from urllib.parse import quote
 import requests
 from django.conf import settings
 
-from .errors import LocationNotFound, UpstreamError
+from .errors import LocationNotFound, UpstreamError, describe
 
 URL = "https://api.mapbox.com/geocoding/v5/mapbox.places/{query}.json"
 
@@ -21,7 +21,7 @@ def geocode(query: str) -> tuple[float, float, str]:
         )
         resp.raise_for_status()
     except requests.RequestException as exc:
-        raise UpstreamError(f"Geocoding service failed: {exc}") from exc
+        raise UpstreamError(f"Geocoding service failed: {describe(exc)}") from exc
 
     features = resp.json().get("features", [])
     if not features:

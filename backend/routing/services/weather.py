@@ -6,7 +6,7 @@ import requests
 from django.conf import settings
 from django.core.cache import cache
 
-from .errors import UpstreamError
+from .errors import UpstreamError, describe
 
 URL = "https://api.open-meteo.com/v1/forecast"
 HOURLY_VARS = "wind_speed_10m,rain,showers,snowfall"
@@ -89,7 +89,7 @@ def _request(batch: list[tuple[float, float]], window: tuple[str, str]) -> list[
         resp.raise_for_status()
         payload = resp.json()
     except (requests.RequestException, ValueError) as exc:
-        raise UpstreamError(f"Weather service failed: {exc}") from exc
+        raise UpstreamError(f"Weather service failed: {describe(exc)}") from exc
 
     # One location returns an object, several return a list.
     items = payload if isinstance(payload, list) else [payload]

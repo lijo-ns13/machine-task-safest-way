@@ -57,3 +57,19 @@ def test_no_routes(monkeypatch):
     monkeypatch.setattr(routing.requests, "get", lambda *a, **k: FakeResponse({"routes": []}))
     with pytest.raises(NoRouteFound):
         routing.get_routes((0, 0), (1, 1))
+
+
+def test_upstream_error_does_not_leak_the_token(monkeypatch):
+    class Unauthorized:
+        status_code = 401
+
+        def raise_for_status(self):
+            error = geocoding.requests.HTTPError("401 for url: https://x?access_token=pk.test")
+            error.response = self
+            raise error
+
+    monkeypatch.setattr(geocoding.requests, "get", lambda *a, **k: Unauthorized())
+    with pytest.raises(UpstreamError) as info:
+        geocoding.geocode("Dallas")
+    assert "pk.test" not in str(info.value)
+    assert "MAPBOX_TOKEN" in str(info.value)

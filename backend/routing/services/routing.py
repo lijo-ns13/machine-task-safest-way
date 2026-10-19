@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import requests
 from django.conf import settings
 
-from .errors import NoRouteFound, UpstreamError
+from .errors import NoRouteFound, UpstreamError, describe
 
 URL = "https://api.mapbox.com/directions/v5/mapbox/driving/{coords}"
 METERS_PER_MILE = 1609.344
@@ -36,7 +36,7 @@ def get_routes(origin: tuple[float, float], destination: tuple[float, float]) ->
         )
         resp.raise_for_status()
     except requests.RequestException as exc:
-        raise UpstreamError(f"Routing service failed: {exc}") from exc
+        raise UpstreamError(f"Routing service failed: {describe(exc)}") from exc
 
     routes = resp.json().get("routes", [])[:3]
     if not routes:

@@ -1,3 +1,12 @@
+def describe(exc: Exception) -> str:
+    """Short error text that never includes the request URL (it contains the API token)."""
+    response = getattr(exc, "response", None)
+    if response is not None:
+        hint = " - check MAPBOX_TOKEN" if response.status_code == 401 else ""
+        return f"HTTP {response.status_code}{hint}"
+    return type(exc).__name__
+
+
 class LocationNotFound(Exception):
     """A place name could not be geocoded."""
 
