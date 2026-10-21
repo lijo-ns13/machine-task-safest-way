@@ -32,7 +32,9 @@ USE_TZ = True
 
 # Frontend origins allowed to call the API (comma separated).
 CORS_ALLOWED_ORIGINS = [
-    o for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173").split(",") if o
+    o.strip().rstrip("/")
+    for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+    if o.strip()
 ]
 
 REST_FRAMEWORK = {
