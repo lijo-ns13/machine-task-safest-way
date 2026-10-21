@@ -3,7 +3,13 @@ def describe(exc: Exception) -> str:
     response = getattr(exc, "response", None)
     if response is not None:
         hint = " - check MAPBOX_TOKEN" if response.status_code == 401 else ""
-        return f"HTTP {response.status_code}{hint}"
+        reason = ""
+        if response.status_code == 429:
+            try:
+                reason = f" - {response.json().get('reason', '')}"
+            except ValueError:
+                pass
+        return f"HTTP {response.status_code}{hint}{reason}"
     return type(exc).__name__
 
 
