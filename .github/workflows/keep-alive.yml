@@ -1,0 +1,23 @@
+name: Keep Render awake
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: keep-alive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      # GitHub cron minimum is 5 min, so each run pings every 60s to get ~1 min coverage.
+      - run: |
+          for i in 1 2 3 4 5; do
+            curl -fsS --max-time 50 https://machine-task-safest-way.onrender.com/health || true
+            echo
+            [ "$i" -lt 5 ] && sleep 60
+          done
