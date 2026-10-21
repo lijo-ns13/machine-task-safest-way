@@ -2,6 +2,8 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
+import time
+
 import requests
 from django.conf import settings
 from django.core.cache import cache
@@ -11,6 +13,8 @@ from .errors import UpstreamError, describe
 URL = "https://api.open-meteo.com/v1/forecast"
 HOURLY_VARS = "wind_speed_10m,rain,showers,snowfall"
 BATCH_SIZE = 50  # locations per HTTP call (keeps the URL short)
+MAX_ATTEMPTS = 4
+RETRY_STATUSES = {429, 502, 503, 504}
 
 
 @dataclass(frozen=True)
@@ -85,15 +89,24 @@ def _request(batch: list[tuple[float, float]], window: tuple[str, str]) -> list[
         "end_date": window[1],
     }
     try:
-        resp = requests.get(URL, params=params, timeout=settings.EXTERNAL_API_TIMEOUT)
-        resp.raise_for_status()
-        payload = resp.json()
+        payload = _get_with_retry(params)
     except (requests.RequestException, ValueError) as exc:
         raise UpstreamError(f"Weather service failed: {describe(exc)}") from exc
 
     # One location returns an object, several return a list.
     items = payload if isinstance(payload, list) else [payload]
     return [_parse(item["hourly"]) for item in items]
+
+
+def _get_with_retry(params: dict):
+    """Open-Meteo rate-limits shared cloud IPs (429); back off and retry."""
+    for attempt in range(MAX_ATTEMPTS):
+        resp = requests.get(URL, params=params, timeout=settings.EXTERNAL_API_TIMEOUT)
+        if resp.status_code in RETRY_STATUSES and attempt < MAX_ATTEMPTS - 1:
+            time.sleep(2 ** attempt)
+            continue
+        resp.raise_for_status()
+        return resp.json()
 
 
 def _parse(hourly: dict) -> Forecast:

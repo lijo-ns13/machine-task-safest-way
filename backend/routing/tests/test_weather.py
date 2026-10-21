@@ -22,8 +22,9 @@ def _hourly(wind):
 
 
 class FakeResponse:
-    def __init__(self, payload):
+    def __init__(self, payload, status_code=200):
         self.payload = payload
+        self.status_code = status_code
 
     def raise_for_status(self):
         pass
@@ -88,3 +89,18 @@ def test_upstream_failure_is_wrapped(monkeypatch):
     monkeypatch.setattr(weather.requests, "get", boom)
     with pytest.raises(UpstreamError):
         weather.fetch_forecasts([(30.0, -97.0)], START, 24)
+
+
+def test_429_is_retried_then_succeeds(monkeypatch):
+    monkeypatch.setattr(weather.time, "sleep", lambda s: None)
+    calls = []
+
+    def fake_get(url, params, timeout):
+        calls.append(1)
+        if len(calls) < 3:
+            return FakeResponse({}, status_code=429)
+        return FakeResponse({"hourly": _hourly(5)})
+
+    monkeypatch.setattr(weather.requests, "get", fake_get)
+    weather.fetch_forecasts([(1.0, 2.0)], START, 24)
+    assert len(calls) == 3
